@@ -1,12 +1,13 @@
 import { window, commands, workspace, ExtensionContext, TextDocument, Position } from 'vscode';
 import { LanguageClient, RequestType, TextDocumentPositionParams, ServerOptions, TransportKind } from 'vscode-languageclient/node';
-import { LanguageClientOptions } from 'vscode-languageclient';
+import type { LanguageClientOptions } from 'vscode-languageclient';
 import { activateTagClosing } from './html/autoClose.js';
+import path from 'path';
 
 const TagCloseRequest: RequestType<TextDocumentPositionParams, string, any> = new RequestType('html/tag');
 
 export async function activate(context: ExtensionContext) {
-	const serverModule = require.resolve('@astrojs/language-server/bin/server.js');
+	const serverModule = context.asAbsolutePath(path.join('dist', 'language-server.js'));
 
 	const port = 6040;
 	const debugOptions = { execArgv: ['--nolazy', '--inspect=' + port] };

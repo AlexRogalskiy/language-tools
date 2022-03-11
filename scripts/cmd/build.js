@@ -19,6 +19,7 @@ const defaultConfig = {
 export default async function build(...args) {
 	const config = Object.assign({}, defaultConfig);
 	const isDev = args.slice(-1)[0] === 'IS_DEV';
+	const vscode = args.includes('--vscode');
 	const patterns = args
 		.filter((f) => !!f) // remove empty args
 		.map((f) => f.replace(/^'/, '').replace(/'$/, '')); // Needed for Windows: glob strings contain surrounding string chars??? remove these
@@ -28,6 +29,21 @@ export default async function build(...args) {
 	const format = type === 'module' ? 'esm' : 'cjs';
 	const outdir = 'dist';
 	await clean(outdir);
+
+	if (vscode) {
+		// reference: https://github.com/evanw/esbuild/issues/1753
+		await esbuild.build({
+			...config,
+			bundle: true,
+			minify: true,
+			external: ['vscode'],
+			mainFields: ['module', 'main'],
+			entryPoints,
+			outdir,
+			format,
+		});
+		return;
+	}
 
 	if (!isDev) {
 		await esbuild.build({
